@@ -717,7 +717,28 @@ Item {
     var query = root.filterText.trim()
     root.searchDivider = false
 
-    if (query) {
+    // ">" prefix: everything after it is a prompt for a new no-project
+    // T3 Code thread, started by ~/.local/bin/t3-ask on Enter.
+    if (active === "root" && query.charAt(0) === ">") {
+      var t3Prompt = query.slice(1).trim()
+      rows.push({
+        itemId: "t3.ask",
+        kind: t3Prompt ? "action" : "hint",
+        icon: "󰭹",
+        iconFont: "JetBrainsMono Nerd Font",
+        appIcon: "",
+        appId: "",
+        label: "Ask T3 Code",
+        target: "",
+        detail: t3Prompt ? t3Prompt : "Type a prompt (new thread, no project)",
+        path: "",
+        childCount: 0,
+        action: t3Prompt ? "$HOME/.local/bin/t3-ask " + Util.shellQuote(t3Prompt) : "",
+        provider: "",
+        score: 0,
+        section: ""
+      })
+    } else if (query) {
       var currentRows = []
       var drilldownRows = []
 
@@ -919,6 +940,7 @@ Item {
     if (index < 0 || index >= displayModel.count) return
 
     var row = displayModel.get(index)
+    if (row.kind === "hint") return
     if (row.kind === "calc") {
       var result = String(row.label || "").replace(/^=\s*/, "")
       applySerial = requestSerial
